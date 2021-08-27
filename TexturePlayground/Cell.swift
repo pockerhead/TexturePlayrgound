@@ -9,15 +9,24 @@ import AsyncDisplayKit
 
 final class Cell: ASCellNode {
     
-    let photo = ASDisplayNode()
+    var someView: UIView!
+    
+    let photo = ASNetworkImageNode()
     let label = ASTextNode()
     let secondLabel = ASTextNode()
+    var text: String = ""
+    var subText: String = ""
+    var url: String = ""
 
     override func didLoad() {
         super.didLoad()
-        style.preferredLayoutSize = .init(width: .init(unit: .auto, value: 1),
-                                          height: .init(unit: .points, value: 100))
+        someView = UIView()
+        photo.contentMode = .scaleAspectFit
+        style.preferredLayoutSize = .init(width: .init(unit: .fraction, value: 1),
+                                          height: .init(unit: .auto, value: 1))
         addSubnode(photo)
+        someView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
+        view.addSubview(someView)
         addSubnode(secondLabel)
         photo.backgroundColor = .black
         addSubnode(label)
@@ -25,31 +34,46 @@ final class Cell: ASCellNode {
         label.maximumNumberOfLines = 0
     }
     
+    override func layout() {
+        super.layout()
+        someView.frame = bounds
+    }
+    
     override func layoutDidFinish() {
         super.layoutDidFinish()
         layer.cornerRadius = 12
-        photo.layer.cornerRadius = photo.frame.height / 2
     }
     
     override func didEnterPreloadState() {
         super.didEnterPreloadState()
-        label.configure(with: .body1(UUID().uuidString))
-        secondLabel.configure(with: .body1(UUID().uuidString))
+        label.configure(with: .body1(text))
+        secondLabel.configure(with: .body1(subText))
+        photo.setURL(.init(string: url), resetToDefault: true)
     }
     
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
-        label.style.flexShrink = 1
-        secondLabel.style.flexShrink = 1
         let verticalStack = ASStackLayoutSpec(direction: .vertical, spacing: 2, justifyContent: .center, alignItems: .start, flexWrap: .wrap, alignContent: .center, children: [label, secondLabel])
-        verticalStack.style.flexBasis = .init(unit: .auto, value: 1)
-        verticalStack.style.flexShrink = 1
         photo.style.preferredSize = .init(width: 64, height: 64)
         let horizontalStack = ASStackLayoutSpec(direction: .horizontal, spacing: 8, justifyContent: .start, alignItems: .center, children: [photo, verticalStack])
-        horizontalStack.style.flexGrow = 1
-        return ASInsetLayoutSpec(insets: .init(top: 8, left: 16, bottom: 8, right: 16), child: horizontalStack).styled({
-            $0.flexGrow = 1
-            $0.flexShrink = 1
-        })
+        return ASInsetLayoutSpec(insets: .init(top: 8, left: 16, bottom: 8, right: 16), child: horizontalStack)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        UIView.animate(withDuration: 0.3) {[self] in
+            transform = CATransform3DMakeScale(0.9, 0.9, 1)
+        }
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>?, with event: UIEvent?) {
+        UIView.animate(withDuration: 0.2) {[self] in
+            transform = CATransform3DIdentity
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        UIView.animate(withDuration: 0.2) {[self] in
+            transform = CATransform3DIdentity
+        }
     }
 }
 
