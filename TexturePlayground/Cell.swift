@@ -26,6 +26,9 @@ final class Cell: ASCellNode {
         someView = UIView()
         view.addSubview(someView)
         addSubnode(separator)
+        label.placeholderEnabled = true
+        label.highlightStyle = .dark
+        secondLabel.placeholderEnabled = true
         separator.backgroundColor = .separator
         photo.contentMode = .scaleAspectFit
         style.preferredLayoutSize = .init(width: .init(unit: .fraction, value: 1),

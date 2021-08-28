@@ -9,6 +9,7 @@ import UIKit
 import AsyncDisplayKit
 import Combine
 
+//Mimkk0fjy0hb7qyAZ0iHnsTJUqrTXxkJ
 let apiKey: [UInt8] = [0x4a,0x6b,0x78,0x58,0x54,0x72,0x71,0x55,0x4a,0x54,0x73,0x6e,0x48,0x69,0x30,0x5a,0x41,0x79,0x71,0x37,0x62,0x68,0x30,0x79,0x6a,0x66,0x30,0x6b,0x6b,0x6d,0x69,0x4d]
 let proxy = UUID().uuidString
 
@@ -36,8 +37,7 @@ class ViewController: ASDKViewController<ASCollectionNode> {
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
-        var collectionView = ASCollectionNode(collectionViewLayout: layout)
-        super.init(node: collectionView)
+        super.init(node: ASCollectionNode(collectionViewLayout: layout))
     }
     
     required init?(coder: NSCoder) {
@@ -50,6 +50,7 @@ class ViewController: ASDKViewController<ASCollectionNode> {
         navigationController?.navigationBar.prefersLargeTitles = true
         node.backgroundColor = .white
         node.delegate = self
+        node.placeholderEnabled = true
         node.view.delaysContentTouches = false
         node.dataSource = self
         node.automaticallyManagesSubnodes = true
@@ -63,8 +64,6 @@ class ViewController: ASDKViewController<ASCollectionNode> {
         var comps = URLComponents(string: "https://api.giphy.com/v1/stickers/random")!
         comps.queryItems = [
             .init(name: "api_key", value: data2),
-            .init(name: "limit", value: "20"),
-            .init(name: "offset", value: "\(page)"),
             .init(name: "random_id", value: proxy)
         ]
         var request = URLRequest(url: comps.url!)
@@ -88,8 +87,6 @@ class ViewController: ASDKViewController<ASCollectionNode> {
                 self.node.performBatch(animated: true) {
                     self.node.insertItems(at: (count...(count + stickers.count - 1))
                                         .map({ IndexPath(item: $0, section: 0)}))
-                } completion: { _ in
-                    
                 }
             }
             .store(in: &cancellables)
@@ -107,7 +104,6 @@ class ViewController: ASDKViewController<ASCollectionNode> {
         ]
         var request = URLRequest(url: comps.url!)
         request.httpMethod = "GET"
-        print(request.url?.absoluteString)
         URLSession.shared.dataTaskPublisher(for: request)
             .map({ $0.data })
             .decode(type: BasicResponse<[Sticker]>.self, decoder: JSONDecoder())
@@ -116,7 +112,6 @@ class ViewController: ASDKViewController<ASCollectionNode> {
             .sink(receiveCompletion: { compl in
                 
             }, receiveValue: { stickers in
-                let count = self.data.count
                 self.data.append(contentsOf: stickers)
                 context?.completeBatchFetching(true)
             })
@@ -155,7 +150,6 @@ extension ViewController: ASCollectionDataSource, ASCollectionDelegate {
     }
     
     func collectionNode(_ collectionNode: ASCollectionNode, didSelectItemAt indexPath: IndexPath) {
-        let cell = collectionNode.cellForItem(at: indexPath) as? Cell
         data[indexPath.item].title = (data[indexPath.item].title ?? "") + (data[indexPath.item].title ?? "")
         collectionNode.performBatch(animated: true) {
             collectionNode.reloadItems(at: [indexPath])
@@ -170,6 +164,7 @@ extension ViewController: ASCollectionDataSource, ASCollectionDelegate {
             let cell = Cell()
             if let data = self.data[safe: indexPath.item] {
                 let title = data.title ?? ""
+                cell.placeholderEnabled = true
                 cell.label.configure(with: .body1(title))
                 cell.secondLabel.configure(with: .body1(data.type ?? ""))
                 cell.url = data.images?.fixed_height?.url ?? ""
@@ -184,7 +179,7 @@ extension ViewController: ASCollectionDataSource, ASCollectionDelegate {
     }
     
     func collectionNode(_ collectionNode: ASCollectionNode, willBeginBatchFetchWith context: ASBatchContext) {
-        getRandomStickers(count: 200, context: context)
+        getRandomStickers(count: 100, context: context)
     }
 }
 
