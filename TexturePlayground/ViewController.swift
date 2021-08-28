@@ -23,6 +23,8 @@ class ViewController: ASDKViewController<ASCollectionNode> {
     override init() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
         var collectionView = ASCollectionNode(collectionViewLayout: layout)
         super.init(node: collectionView)
     }
@@ -43,7 +45,7 @@ class ViewController: ASDKViewController<ASCollectionNode> {
     }
     
     func modelIdentifierForElement(at indexPath: IndexPath, in collectionNode: ASCollectionNode) -> String? {
-        return data[indexPath.item].title
+        return data[indexPath.item].images?.fixed_height?.url
     }
     
     func getRandomStickers(count: Int, context: ASBatchContext? = nil) {
@@ -142,10 +144,10 @@ extension ViewController: ASCollectionDataSource, ASCollectionDelegate {
     }
     
     func collectionNode(_ collectionNode: ASCollectionNode, didSelectItemAt indexPath: IndexPath) {
-        let removed = data.remove(at: indexPath.item)
-        data.insert(removed, at: 0)
+        let cell = collectionNode.cellForItem(at: indexPath) as? Cell
+        data[indexPath.item].title = (data[indexPath.item].title ?? "") + (data[indexPath.item].title ?? "")
         collectionNode.performBatch(animated: true) {
-            collectionNode.reloadSections([0])
+            collectionNode.reloadItems(at: [indexPath])
         } completion: { _ in
             
         }
