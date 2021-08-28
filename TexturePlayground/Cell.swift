@@ -20,6 +20,7 @@ final class Cell: ASCellNode {
 
     override func didLoad() {
         super.didLoad()
+        photo.backgroundColor = .clear
         someView = UIView()
         photo.contentMode = .scaleAspectFit
         style.preferredLayoutSize = .init(width: .init(unit: .fraction, value: 1),
@@ -46,35 +47,34 @@ final class Cell: ASCellNode {
     
     override func didEnterPreloadState() {
         super.didEnterPreloadState()
-        label.configure(with: .body1(text))
-        secondLabel.configure(with: .body1(subText))
         photo.setURL(.init(string: url), resetToDefault: true)
     }
     
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
-        let verticalStack = ASStackLayoutSpec(direction: .vertical, spacing: 2, justifyContent: .center, alignItems: .start, flexWrap: .wrap, alignContent: .center, children: [label, secondLabel])
+        let verticalStack = ASStackLayoutSpec(direction: .vertical, spacing: 2, justifyContent: .center, alignItems: .start, children: [label, secondLabel])
+        verticalStack.style.flexShrink = 1
         photo.style.preferredSize = .init(width: 64, height: 64)
         let horizontalStack = ASStackLayoutSpec(direction: .horizontal, spacing: 8, justifyContent: .start, alignItems: .center, children: [photo, verticalStack])
         return ASInsetLayoutSpec(insets: .init(top: 8, left: 16, bottom: 8, right: 16), child: horizontalStack)
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        UIView.animate(withDuration: 0.3) {[self] in
-            transform = CATransform3DMakeScale(0.9, 0.9, 1)
-        }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>?, with event: UIEvent?) {
-        UIView.animate(withDuration: 0.2) {[self] in
-            transform = CATransform3DIdentity
-        }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        UIView.animate(withDuration: 0.2) {[self] in
-            transform = CATransform3DIdentity
-        }
-    }
+//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        UIView.animate(withDuration: 0.3) {[self] in
+//            transform = CATransform3DMakeScale(0.9, 0.9, 1)
+//        }
+//    }
+//    
+//    override func touchesCancelled(_ touches: Set<UITouch>?, with event: UIEvent?) {
+//        UIView.animate(withDuration: 0.2) {[self] in
+//            transform = CATransform3DIdentity
+//        }
+//    }
+//    
+//    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        UIView.animate(withDuration: 0.2) {[self] in
+//            transform = CATransform3DIdentity
+//        }
+//    }
 }
 
 struct DSLabel {

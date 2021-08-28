@@ -23,7 +23,7 @@ class ViewController: ASDKViewController<ASCollectionNode> {
     override init() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        let collectionView = ASCollectionNode(collectionViewLayout: layout)
+        var collectionView = ASCollectionNode(collectionViewLayout: layout)
         super.init(node: collectionView)
     }
     
@@ -37,8 +37,13 @@ class ViewController: ASDKViewController<ASCollectionNode> {
         navigationController?.navigationBar.prefersLargeTitles = true
         node.backgroundColor = .white
         node.delegate = self
+        node.view.delaysContentTouches = false
         node.dataSource = self
         node.automaticallyManagesSubnodes = true
+    }
+    
+    func modelIdentifierForElement(at indexPath: IndexPath, in collectionNode: ASCollectionNode) -> String? {
+        return data[indexPath.item].title
     }
     
     func getRandomStickers(count: Int, context: ASBatchContext? = nil) {
@@ -67,7 +72,7 @@ class ViewController: ASDKViewController<ASCollectionNode> {
                 self.data.append(contentsOf: stickers)
                 context?.completeBatchFetching(true)
                 
-                self.node.performBatch(animated: false) {
+                self.node.performBatch(animated: true) {
                     self.node.insertItems(at: (count...(count + stickers.count - 1))
                                         .map({ IndexPath(item: $0, section: 0)}))
                 } completion: { _ in
@@ -136,13 +141,26 @@ extension ViewController: ASCollectionDataSource, ASCollectionDelegate {
         return data.count
     }
     
+    func collectionNode(_ collectionNode: ASCollectionNode, didSelectItemAt indexPath: IndexPath) {
+        let removed = data.remove(at: indexPath.item)
+        data.insert(removed, at: 0)
+        collectionNode.performBatch(animated: true) {
+            collectionNode.reloadSections([0])
+        } completion: { _ in
+            
+        }
+
+    }
+    
     func collectionNode(_ collectionNode: ASCollectionNode, nodeBlockForItemAt indexPath: IndexPath) -> ASCellNodeBlock {
         {
             let cell = Cell()
             if let data = self.data[safe: indexPath.item] {
-                cell.text = data.title ?? ""
-                cell.subText = data.type ?? ""
+                let title = data.title ?? ""
+                cell.label.configure(with: .body1(title))
+                cell.secondLabel.configure(with: .body1(data.type ?? ""))
                 cell.url = data.images?.fixed_height?.url ?? ""
+                cell.style.preferredLayoutSize = .init(width: .init(unit: .fraction, value: 1), height: .init(unit: .auto, value: 1))
             }
             return cell
         }
