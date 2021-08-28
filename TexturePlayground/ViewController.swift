@@ -9,8 +9,19 @@ import UIKit
 import AsyncDisplayKit
 import Combine
 
-let apiKey = "Mimkk0fjy0hb7qyAZ0iHnsTJUqrTXxkJ"
+let apiKey: [UInt8] = [0x4a,0x6b,0x78,0x58,0x54,0x72,0x71,0x55,0x4a,0x54,0x73,0x6e,0x48,0x69,0x30,0x5a,0x41,0x79,0x71,0x37,0x62,0x68,0x30,0x79,0x6a,0x66,0x30,0x6b,0x6b,0x6d,0x69,0x4d]
 let proxy = UUID().uuidString
+
+var data2: String {
+    let data2 = apiKey
+        .reversed()
+        .reduce(Data.init(capacity: apiKey.count)) { acc, next in
+        var acc = acc
+        acc.append(next)
+        return acc
+    }
+    return String(data: data2, encoding: .utf8)!
+}
 
 class ViewController: ASDKViewController<ASCollectionNode> {
     
@@ -51,7 +62,7 @@ class ViewController: ASDKViewController<ASCollectionNode> {
     func getRandomStickers(count: Int, context: ASBatchContext? = nil) {
         var comps = URLComponents(string: "https://api.giphy.com/v1/stickers/random")!
         comps.queryItems = [
-            .init(name: "api_key", value: apiKey),
+            .init(name: "api_key", value: data2),
             .init(name: "limit", value: "20"),
             .init(name: "offset", value: "\(page)"),
             .init(name: "random_id", value: proxy)
@@ -89,7 +100,7 @@ class ViewController: ASDKViewController<ASCollectionNode> {
         page += 1
         var comps = URLComponents(string: "https://api.giphy.com/v1/stickers/trending")!
         comps.queryItems = [
-            .init(name: "api_key", value: apiKey),
+            .init(name: "api_key", value: data2),
             .init(name: "limit", value: "20"),
             .init(name: "offset", value: "\(page)"),
             .init(name: "random_id", value: proxy)
